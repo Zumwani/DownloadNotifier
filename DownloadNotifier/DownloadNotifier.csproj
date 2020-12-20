@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Common.Wpf\Common.Wpf.App\Common.Wpf.App.csproj" />
+    <ProjectReference Include="..\..\..\OneDrive\Wpf\Common.Wpf\Common.Wpf.App\Common.Wpf.App.csproj" />
   </ItemGroup>
 
   <ItemGroup>
