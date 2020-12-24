@@ -24,10 +24,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\OneDrive\Wpf\Common.Wpf\Common.Wpf.App\Common.Wpf.App.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Resource Include="icon.ico">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>

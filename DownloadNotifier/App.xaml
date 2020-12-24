@@ -1,17 +1,15 @@
 ﻿<common:App x:Class="DownloadNotifier.App" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-            xmlns:common="http://common"
+            xmlns:common="clr-namespace:Common.Wpf"
             PackageName="com.downloadsnotifier.app"
             ShutdownMode="OnExplicitShutdown">
 
     <common:App.NotifyIcon>
         <common:NotifyIcon IconSource="icon.ico" ToolTip="Downloads notifier">
-            <common:NotifyIcon.ContextMenu>
-                <ContextMenu>
-                    <MenuItem Header="View downloads" Click="ViewDownloads"/>
-                    <MenuItem Header="Quit" Click="Shutdown"/>
-                </ContextMenu>
-            </common:NotifyIcon.ContextMenu>
+            <ContextMenu>
+                <MenuItem Header="View downloads" Click="ViewDownloads"/>
+                <MenuItem Header="Quit" Click="Shutdown"/>
+            </ContextMenu>
         </common:NotifyIcon>
     </common:App.NotifyIcon>
     

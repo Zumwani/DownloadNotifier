@@ -1,8 +1,9 @@
-﻿using System.IO;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+using System.IO;
 using System.Windows;
 using Microsoft.Toolkit.Uwp.Notifications;
 using Syroot.Windows.IO;
-using Windows.UI.Notifications;
 
 namespace DownloadNotifier
 {
@@ -12,8 +13,12 @@ namespace DownloadNotifier
 
         protected override void OnStartup(StartupEventArgs e)
         {
+
+            ToastNotificationManagerCompat.OnActivated += OnToastActivate;
+
             StartWatcher();
             base.OnStartup(e);
+
         }
 
         void ViewDownloads(object sender, RoutedEventArgs e) =>
@@ -36,37 +41,60 @@ namespace DownloadNotifier
             watcher.Changed += OnFileChanged;
             watcher.Error += (s, e) => StartWatcher();
 
-            ToastNotificationManagerCompat.OnActivated += (e) =>
-            {
-                if (e.Argument.StartsWith("View:"))
-                    OpenUtility.ViewInExplorer(e.Argument["View:".Length..]);
-                else if (e.Argument.StartsWith("Open:"))
-                    OpenUtility.Open(e.Argument["Open:".Length..]);
-                else if (e.Argument.StartsWith("OpenWith:"))
-                    OpenUtility.OpenWith(e.Argument["OpenWith:".Length..]);
-            };
-
         }
 
         static void OnFileChanged(object sender, FileSystemEventArgs e)
         {
 
-            if (e.FullPath.EndsWith(".part"))
+            if (e.FullPath.EndsWith(".part") || e.FullPath.EndsWith(".crdownload"))
                 return;
 
-            var content = new ToastContentBuilder().
-                AddToastActivationInfo("Open:" + e.FullPath, ToastActivationType.Background).
-                SetToastScenario(ToastScenario.Reminder).
-                AddText("'" + e.Name + "' just got downloaded.").
-                AddButton("Open with...", ToastActivationType.Background, "OpenWith:" + e.FullPath).
-                AddButton("View in downloads", ToastActivationType.Background, "View:" + e.FullPath).
-                GetToastContent();
-
-            var toast = new ToastNotification(content.GetXml());
-
-            ToastNotificationManagerCompat.CreateToastNotifier().Show(toast);
+            SendToast(e.FullPath);
 
         }
+
+        #endregion
+        #region Toast
+
+        public enum ActivateAction
+        {
+
+            [Display(Name = "Open")]
+            Open,
+
+            [Display(Name = "Open with...")]
+            OpenWith,
+
+            [Display(Name = "View in downloads")]
+            View
+
+        }
+
+        static void OnToastActivate(ToastNotificationActivatedEventArgsCompat e)
+        {
+
+            if (Enum.TryParse<ActivateAction>(e.Argument[..e.Argument.IndexOf(":")], out var action))
+                GetAction()?.Invoke();
+
+            Action GetAction() =>
+                action switch
+                {
+                    ActivateAction.Open =>      () => OpenUtility.Open(e.Argument["Open:".Length..]),
+                    ActivateAction.OpenWith =>  () => OpenUtility.OpenWith(e.Argument["OpenWith:".Length..]),
+                    ActivateAction.View =>      () => OpenUtility.ViewInExplorer(e.Argument["View:".Length..]),
+                    _ => null,
+                };
+
+        }
+
+        static void SendToast(string file) =>
+            new ToastContentBuilder().
+                SetToastScenario(ToastScenario.Reminder).
+                AddText($"'{Path.GetFileName(file)}' just got downloaded.").
+                AddAction(ActivateAction.Open,      file).
+                AddButton(ActivateAction.OpenWith,  file).
+                AddButton(ActivateAction.View,      file).
+                Send();
 
         #endregion
 
